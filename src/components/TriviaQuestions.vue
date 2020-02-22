@@ -1,14 +1,22 @@
 <template>
   <div id="main-trivia-container">
+    <Categories
+      v-if="this.exit_check"
+      v-on:music="$emit('music',1); exited()"
+      v-on:games="$emit('games',2); exited()"
+      v-on:film="$emit('film',3); exited()"
+      v-on:books="$emit('books',4); exited()"
+    />
     <Header
+      v-if="!this.exit_check"
       :numCorrect="numCorrect"
       :numTotal="numTotal"
       :scoreTotal="scoreTotal"
       :freeCash="freeCash"
     />
-    <div id="divider"></div>
-    <div v-if="numTotal != 10" id="timer"></div>
-    <div v-if="numTotal != 10" class="trivia-box">
+    <div v-if="!this.exit_check" id="divider"></div>
+    <div v-if="numTotal != 10 && !this.exit_check" id="timer"></div>
+    <div v-if="numTotal != 10 && !this.exit_check" class="trivia-box">
       <div id="topic">
         <h1>{{question.category}}</h1>
       </div>
@@ -27,7 +35,7 @@
         </form>
       </div>
     </div>
-    <div v-if="numTotal === 10" id="congratulations">
+    <div v-if="numTotal === 10 && !this.exit_check" id="congratulations">
       <h1>Congratulations!</h1>
       <h2>You got {{numCorrect}} out of {{numTotal}} right, that's:</h2>
       <h3 v-if="numCorrect < 5">Absolutely horrible! :)</h3>
@@ -35,7 +43,7 @@
       <h3 v-else>Actually quite scary, nerd! :)</h3>
       <div class="ending-buttons">
         <button id="try-again" @click="tryAgain()" v-on:click="$emit('try-again')">Try again?</button>
-        <button id="exit" @click="$emit('exit')">Exit</button>
+        <button id="exit" @click="exited()">Exit</button>
       </div>
     </div>
   </div>
@@ -45,6 +53,7 @@
 <script>
 import _ from "lodash";
 import Header from "../components/Header.vue";
+import Categories from "../components/Categories.vue";
 
 export default {
   props: {
@@ -59,11 +68,13 @@ export default {
       numCorrect: 0,
       numTotal: 0,
       scoreTotal: 0,
-      freeCash: 0
+      freeCash: 0,
+      exit_check: true
     };
   },
   components: {
-    Header
+    Header,
+    Categories
   },
   watch: {
     question: {
@@ -114,6 +125,10 @@ export default {
     },
     scoreCalc() {
       this.scoreTotal = this.scoreTotal + this.numTotal * this.numCorrect;
+    },
+    exited() {
+      this.exit_check = !this.exit_check;
+      this.tryAgain();
     }
   },
   computed: {

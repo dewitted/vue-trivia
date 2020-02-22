@@ -6,6 +6,10 @@
       :next="next"
       v-on:try-again="$emit('try-again')"
       v-on:exit="startedSwitch()"
+      v-on:music="$emit('music',1)"
+      v-on:games="$emit('games',2)"
+      v-on:film="$emit('film',3)"
+      v-on:books="$emit('books',4)"
     />
     <!-- {{ currentQuestion.question }} -->
     <button class="opening-buttons" id="start" @click="startedSwitch()">START PLAYING</button>
