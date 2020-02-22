@@ -1,9 +1,14 @@
 <template>
-  <div class="main-trivia-container">
-    <Header />
+  <div id="main-trivia-container">
+    <Header
+      :numCorrect="numCorrect"
+      :numTotal="numTotal"
+      :scoreTotal="scoreTotal"
+      :freeCash="freeCash"
+    />
     <div id="divider"></div>
-    <div id="timer"></div>
-    <div class="trivia-box">
+    <div v-if="numTotal != 10" id="timer"></div>
+    <div v-if="numTotal != 10" class="trivia-box">
       <div id="topic">
         <h1>{{question.category}}</h1>
       </div>
@@ -16,10 +21,21 @@
             id="answer-button"
             :key="index"
             v-for="(answer, index) in answers"
-            @click="selectAnswer(index)"
+            @click="selectAnswer(index); submitAnswer()"
             v-on:click="next"
           >{{answer}}</button>
         </form>
+      </div>
+    </div>
+    <div v-if="numTotal === 10" id="congratulations">
+      <h1>Congratulations!</h1>
+      <h2>You got {{numCorrect}} out of {{numTotal}} right, that's:</h2>
+      <h3 v-if="numCorrect < 5">Absolutely horrible! :)</h3>
+      <h3 v-else-if="numCorrect >= 5 && numCorrect < 10">Medioker, just like you! :)</h3>
+      <h3 v-else>Actually quite scary, nerd! :)</h3>
+      <div class="ending-buttons">
+        <button id="try-again" @click="tryAgain()" v-on:click="$emit('try-again')">Try again?</button>
+        <button id="exit" @click="$emit('exit')">Exit</button>
       </div>
     </div>
   </div>
@@ -27,6 +43,7 @@
 
 
 <script>
+import _ from "lodash";
 import Header from "../components/Header.vue";
 
 export default {
@@ -36,16 +53,67 @@ export default {
   },
   data() {
     return {
-      selectedIndex: null
+      selectedIndex: null,
+      correctIndex: null,
+      shuffledAnswers: [],
+      numCorrect: 0,
+      numTotal: 0,
+      scoreTotal: 0,
+      freeCash: 0
     };
   },
   components: {
     Header
   },
+  watch: {
+    question: {
+      immediate: true,
+      handler() {
+        this.selectedIndex = null;
+        this.shuffleAnswers();
+      }
+    },
+    numCorrect: {
+      immediate: true,
+      handler() {
+        this.scoreCalc();
+      }
+    }
+  },
   methods: {
     selectAnswer(index) {
       this.selectedIndex = index;
       console.log(index);
+    },
+    shuffleAnswers() {
+      let answers = [
+        ...this.question.incorrect_answers,
+        this.question.correct_answer
+      ];
+      this.shuffledAnswers = _.shuffle(answers);
+      this.correctIndex = this.shuffledAnswers.indexOf(
+        this.question.correct_answer
+      );
+    },
+    submitAnswer() {
+      let isCorrect = false;
+      if (this.selectedIndex === this.correctIndex) {
+        isCorrect = true;
+      }
+      this.increment(isCorrect);
+    },
+    increment(isCorrect) {
+      if (isCorrect) {
+        this.numCorrect++;
+      }
+      this.numTotal++;
+    },
+    tryAgain() {
+      this.numTotal = 0;
+      this.numCorrect = 0;
+    },
+    scoreCalc() {
+      this.scoreTotal = this.scoreTotal + this.numTotal * this.numCorrect;
     }
   },
   computed: {
@@ -59,7 +127,7 @@ export default {
 </script>
 
 <style lang="scss">
-  .main-trivia-container {
+  #main-trivia-container {
     font-family: "Open Sans", sans-serif;
     width: 80%;
     height: 80%;
@@ -130,6 +198,51 @@ export default {
             font-size: 0.75rem;
             font-weight: bold;
           }
+        }
+      }
+    }
+    #congratulations {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      padding-top: 20%;
+      padding-left: 5%;
+      padding-right: 5%;
+      h1 {
+        margin: 0;
+        color: rgb(45, 218, 45);
+        font-size: 1.5em;
+      }
+      h2 {
+        margin: 0;
+        font-size: 1.2em;
+      }
+      h3 {
+        margin: 0;
+        color: red;
+        font-size: 1em;
+      }
+      .ending-buttons {
+        width: 100%;
+        height: 30%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        button {
+          width: 90%;
+          height: 30%;
+          background-color: white;
+          border-radius: 40px;
+          border: 1px solid black;
+          font-size: 0.75rem;
+          font-weight: bold;
+          margin-bottom: 5px;
         }
       }
     }

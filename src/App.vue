@@ -1,17 +1,21 @@
 <template>
   <div id="app">
-    <OpeningWindow :currentQuestion="questions[index]" :next="next" />
+    <OpeningWindow
+      :currentQuestion="questions[index]"
+      :next="next"
+      v-on:try-again="reshuffleArray()"
+    />
   </div>
 </template>
 
 <script>
 import OpeningWindow from "./components/OpeningWindow.vue";
+import _ from "lodash";
 
 export default {
   name: "App",
   components: {
     OpeningWindow
-    // TriviaQuestions
   },
   data() {
     return {
@@ -35,6 +39,10 @@ export default {
   methods: {
     next: function() {
       this.index++;
+    },
+    reshuffleArray() {
+      this.index = 0;
+      this.questions = _.shuffle(this.questions);
     }
   }
 };

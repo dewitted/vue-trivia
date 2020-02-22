@@ -1,6 +1,12 @@
 <template>
   <div class="main-container">
-    <TriviaQuestions v-if="started" :question="currentQuestion" :next="next" />
+    <TriviaQuestions
+      v-if="started"
+      :question="currentQuestion"
+      :next="next"
+      v-on:try-again="$emit('try-again')"
+      v-on:exit="startedSwitch()"
+    />
     <!-- {{ currentQuestion.question }} -->
     <button class="opening-buttons" id="start" @click="startedSwitch()">START PLAYING</button>
     <button class="opening-buttons" id="howTo">How to play?</button>
